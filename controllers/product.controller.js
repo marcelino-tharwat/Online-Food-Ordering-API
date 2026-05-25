@@ -1,52 +1,39 @@
-import Product from '../models/Product.js';
+﻿import Product from "../models/Product.js";
+import { ApiError } from "../utils/apiError.js";
+import catchAsync from "../utils/catchAsync.js";
 
-export const getProducts = async (req, res) => {
-  try {
-    const products = await Product.find({});
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+export const getProducts = catchAsync(async (req, res, next) => {
+  const products = await Product.find({});
+  res.status(200).json({ success: true, count: products.length, products });
+});
 
-export const getProductById = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (product) res.json(product);
-    else res.status(404).json({ message: 'Product not found' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+export const getProductById = catchAsync(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
   }
-};
+  res.status(200).json({ success: true, product });
+});
 
-export const createProduct = async (req, res) => {
-  try {
-    const product = await Product.create({ ...req.body, user: req.user._id });
-    res.status(201).json(product);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+export const createProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.create({ ...req.body, user: req.user._id });
+  res.status(201).json({ success: true, product });
+});
 
-export const updateProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      Object.assign(product, req.body);
-      await product.save();
-      res.json(product);
-    } else res.status(404).json({ message: 'Product not found' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+export const updateProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
   }
-};
+  Object.assign(product, req.body);
+  await product.save();
+  res.status(200).json({ success: true, product });
+});
 
-export const deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (product) res.json({ message: 'Product removed' });
-    else res.status(404).json({ message: 'Product not found' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+export const deleteProduct = catchAsync(async (req, res, next) => {
+  const product = await Product.findByIdAndDelete(req.params.id);
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
   }
-};
+  res.status(200).json({ success: true, message: "Product removed" });
+});

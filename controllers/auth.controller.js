@@ -1,62 +1,66 @@
-import User from "../models/User.js";
-import jwt from "jsonwebtoken";
+﻿import User from "../models/User.js";
+import { generateToken } from "../utils/generateToken.js";
+import { ApiError } from "../utils/apiError.js";
+import catchAsync from "../utils/catchAsync.js";
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-};
+// POST /auth/register
+export const registerUser = catchAsync(async (req, res, next) => {
+  const { name, email, password } = req.body;
 
-export const registerUser = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    const userExists = await User.findOne({ email });
-    if (userExists)
-      return res.status(400).json({ message: "User already exists" });
+  // Check if user already exists
+  const userExists = await User.findOne({ email: email.toLowerCase() });
+  if (userExists) {
+    return next(new ApiError("User with this email already exists", 400));
+  }
 
-    const user = await User.create({ name, email, password });
-    res.status(201).json({
+  // Create user (password hashed by pre-save middleware)
+  const user = await User.create({ name, email, password });
+  const token = generateToken(user._id);
+
+  res.status(201).json({
+    success: true,
+    status: "success",
+    message: "User registered successfully",
+    token,
+    user: {
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id),
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    },
+  });
+});
 
-export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+// POST /auth/login
+export const loginUser = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
 
-export const getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (user)
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      });
-    else res.status(404).json({ message: "User not found" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  // Find user by email (include password for comparison)
+  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+
+  if (!user) {
+    return next(new ApiError("Invalid email or password", 401));
   }
-};
+
+  // Compare password
+  const isMatch = await user.comparePassword(password);
+
+  if (!isMatch) {
+    return next(new ApiError("Invalid email or password", 401));
+  }
+
+  const token = generateToken(user._id);
+
+  res.status(200).json({
+    success: true,
+    status: "success",
+    message: "Login successful",
+    token,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  });
+});

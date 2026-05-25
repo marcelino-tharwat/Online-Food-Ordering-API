@@ -1,10 +1,12 @@
-import express from "express";
+﻿import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import { connectDB } from "./config/db.js";
+import globalErrorHandler from "./middleware/globalErrorHandler.js";
+import { sanitizeBody } from "./middleware/sanitizeBody.js";
 
 dotenv.config();
 
@@ -13,6 +15,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Sanitize body before any route handler
+app.use(sanitizeBody);
+
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the API" });
 });
@@ -20,6 +25,9 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+
+// Global error handler (must be last)
+app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 
