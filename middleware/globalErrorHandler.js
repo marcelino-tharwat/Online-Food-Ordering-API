@@ -17,7 +17,9 @@ const sendErrorProd = (error, res) => {
     });
   } else {
     console.log(error.name, error.message);
-    res.status(500).json({ status: "error", message: "Something went very wrong" });
+    res
+      .status(500)
+      .json({ status: "error", message: "Something went very wrong" });
   }
 };
 
@@ -38,7 +40,8 @@ const handelValidationDB = (err) => {
   return new ApiError(message, 400);
 };
 
-const handelJWTError = () => new ApiError("Invalid token. please log in again!", 401);
+const handelJWTError = () =>
+  new ApiError("Invalid token. please log in again!", 401);
 
 const handelJWTExpiredError = () =>
   new ApiError("Your token has expired! please log in again!", 401);
