@@ -1,0 +1,26 @@
+export const validateRegister = (req, res, next) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Please add all fields' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters' });
+  }
+  next();
+};
+
+export const validateLogin = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Please add all fields' });
+  }
+  next();
+};
+
+export const validateProduct = (req, res, next) => {
+  const { name, description, price, category } = req.body;
+  if (!name || !description || !price || !category) {
+    return res.status(400).json({ message: 'Please add all required fields' });
+  }
+  next();
+};
