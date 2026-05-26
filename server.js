@@ -10,6 +10,8 @@ import { sanitizeBody } from "./middleware/sanitizeBody.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import { ApiError } from "./utils/apiError.js";
+import cartRoutes from "./routes/cart.routes.js";
+
 dotenv.config();
 
 const app = express();
@@ -27,7 +29,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/categorties", categoryRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/cart", cartRoutes);
 app.use("/api", uploadRoutes);
 app.all(/(.*)/, (req, res, next) => {
   next(new ApiError(`Cant not find ${req.originalUrl} on this server`, 404));
