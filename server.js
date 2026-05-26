@@ -21,7 +21,7 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 // Sanitize body before any route handler
-app.use(sanitizeBody);
+// app.use(sanitizeBody);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the API" });
