@@ -33,10 +33,15 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api", uploadRoutes);
-app.all(/(.*)/, (req, res, next) => {
-  next(new ApiError(`Cant not find ${req.originalUrl} on this server`, 404));
-});
+// app.all(/(.*)/, (req, res, next) => {
+//   next(new ApiError(`Cant not find ${req.originalUrl} on this server`, 404));
+// });
 
+app.all(/(.*)/, (req, res) => {
+  res.status(404).json({
+    message: `Cannot find ${req.originalUrl} on this server`,
+  });
+});
 // Global error handler (must be last)
 app.use(globalErrorHandler);
 
@@ -44,11 +49,12 @@ const PORT = process.env.PORT || 5000;
 
 connectDB()
   .then(() => {
+    console.log("DB connected");
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error("Failed to connect to database:", err);
-    process.exit(1);
+    console.error("DB ERROR:", err);
   });
