@@ -14,20 +14,14 @@ const categorySchema = new mongoose.Schema(
         trim: true,
       },
     },
-    image: {
-      type: String,
-    },
-    available: {
-      type: Boolean,
-      default: true,
-    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Export model safely
-const Category = mongoose.models.Category || mongoose.model("Category", categorySchema);
+const Category =
+  mongoose.models.Category || mongoose.model("Category", categorySchema);
 
 export default Category;

@@ -7,7 +7,9 @@ import orderRoutes from "./routes/order.routes.js";
 import { connectDB } from "./config/db.js";
 import globalErrorHandler from "./middleware/globalErrorHandler.js";
 import { sanitizeBody } from "./middleware/sanitizeBody.js";
-
+import uploadRoutes from "./routes/upload.routes.js";
+import categoryRoutes from "./routes/category.routes.js";
+import { ApiError } from "./utils/apiError.js";
 dotenv.config();
 
 const app = express();
@@ -25,6 +27,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/categorties", categoryRoutes);
+app.use("/api", uploadRoutes);
+app.all(/(.*)/, (req, res, next) => {
+  next(new ApiError(`Cant not find ${req.originalUrl} on this server`, 404));
+});
 
 // Global error handler (must be last)
 app.use(globalErrorHandler);
