@@ -39,6 +39,7 @@ export const addItem = catchAsync(async (req, res, next) => {
   }
 
   const product = await Product.findById(productId);
+
   if (!product) {
     return next(new ApiError("Product not found", 404));
   }
@@ -46,22 +47,36 @@ export const addItem = catchAsync(async (req, res, next) => {
   let cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
-    cart = new Cart({ user: req.user._id, items: [] });
+    cart = await Cart.create({
+      user: req.user._id,
+      items: [{ product: productId, quantity }],
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: cart,
+    });
   }
 
-  const existingItem = cart.items.find(
+  const itemIndex = cart.items.findIndex(
     (item) => item.product.toString() === productId,
   );
 
-  if (existingItem) {
-    existingItem.quantity += quantity;
+  if (itemIndex > -1) {
+    cart.items[itemIndex].quantity += quantity;
   } else {
-    cart.items.push({ product: productId, quantity });
+    cart.items.push({
+      product: productId,
+      quantity,
+    });
   }
 
   await cart.save();
 
-  res.status(200).json({ success: true, data: cart });
+  res.status(200).json({
+    success: true,
+    data: cart,
+  });
 });
 
 export const removeItem = catchAsync(async (req, res, next) => {
