@@ -22,15 +22,19 @@ const app = express();
 app.use(cors({ origin: "*" }));
 
 // Header security
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: false,
-//     crossOriginEmbedderPolicy: false,
-//   }),
-// );
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 //Secure from noSql injection
-app.use(mongoSanitize());
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+  }),
+);
 
 // Secure from html injection
 app.use(xss());
