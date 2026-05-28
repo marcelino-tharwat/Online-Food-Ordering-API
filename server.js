@@ -11,8 +11,8 @@ import uploadRoutes from "./routes/upload.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import { ApiError } from "./utils/apiError.js";
 import cartRoutes from "./routes/cart.routes.js";
-import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
+// import mongoSanitize from "express-mongo-sanitize";
+// import xss from "xss-clean";
 import helmet from "helmet";
 
 dotenv.config();
@@ -33,7 +33,7 @@ app.use(
 // app.use(mongoSanitize());
 
 // Secure from html injection
-app.use(xss());
+// app.use(xss());
 
 app.use(express.json());
 
