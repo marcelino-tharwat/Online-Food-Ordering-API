@@ -30,11 +30,7 @@ app.use(
 );
 
 //Secure from noSql injection
-app.use(
-  mongoSanitize({
-    replaceWith: "_",
-  }),
-);
+// app.use(mongoSanitize());
 
 // Secure from html injection
 app.use(xss());
