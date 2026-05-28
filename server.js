@@ -11,12 +11,29 @@ import uploadRoutes from "./routes/upload.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import { ApiError } from "./utils/apiError.js";
 import cartRoutes from "./routes/cart.routes.js";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import helmet from "helmet";
 
 dotenv.config();
 
 const app = express();
 
 app.use(cors({ origin: "*" }));
+
+// Header security
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
+
+//Secure from noSql injection
+app.use(mongoSanitize());
+
+// Secure from html injection
+app.use(xss());
 
 app.use(express.json());
 
