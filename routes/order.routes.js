@@ -9,7 +9,7 @@ import {
 import { protect } from "../middleware/auth/protect.js";
 import { adminOnly } from "../middleware/auth/adminOnly.js";
 import { idParamValidator } from "../middleware/validateObjectId.js";
-import { createOrderValidator } from "../middleware/order/OrderValidator.js";
+import { createOrderValidator } from "../middleware/order/orderValidator.js";
 import { checkOrderAccess } from "../middleware/order/checkOrderAccess.js";
 const router = express.Router();
 
