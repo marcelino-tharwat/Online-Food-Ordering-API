@@ -38,7 +38,10 @@ export const addItem = catchAsync(async (req, res, next) => {
     return next(new ApiError("Product ID is required", 400));
   }
 
-  const product = await Product.findById(productId);
+  const product = await Product.findOne({
+    _id: productId,
+    available: true,
+  });
 
   if (!product) {
     return next(new ApiError("Product not found", 404));
