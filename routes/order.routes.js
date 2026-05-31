@@ -4,7 +4,8 @@ import {
   getMyOrders,
   getAllOrders,
   getOrderById,
-  updateOrderStatus,
+  cancelOrder,
+  adminUpdateOrderStatus,
 } from "../controllers/order.controller.js";
 import { protect } from "../middleware/auth/protect.js";
 import { adminOnly } from "../middleware/auth/adminOnly.js";
@@ -24,7 +25,15 @@ router.patch(
   protect,
   adminOnly,
   idParamValidator("id"),
-  updateOrderStatus,
+  adminUpdateOrderStatus,
+);
+
+router.patch(
+  "/:id/cancel",
+  protect,
+  idParamValidator("id"),
+  checkOrderAccess,
+  cancelOrder,
 );
 
 router.get(

@@ -2,7 +2,7 @@ import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
 import catchAsync from "../utils/catchAsync.js";
 import { ApiError } from "../utils/apiError.js";
-import { getAll, getOne, updateOne } from "../utils/handlers.js";
+import { getAll, getOne } from "../utils/handlers.js";
 
 export const createOrder = catchAsync(async (req, res, next) => {
   const { fullName, phoneNumber, address } = req.body;
@@ -62,4 +62,49 @@ export const getMyOrders = catchAsync(async (req, res, next) => {
 
 export const getAllOrders = getAll(Order);
 export const getOrderById = getOne(Order, "items.product user");
-export const updateOrderStatus = updateOne(Order);
+
+const VALID_TRANSITIONS = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["delivered"],
+  delivered: [],
+  cancelled: [],
+};
+
+export const cancelOrder = catchAsync(async (req, res, next) => {
+  const order = req.order;
+
+  if (order.status !== "pending") {
+    return next(
+      new ApiError("Only pending orders can be cancelled", 400),
+    );
+  }
+
+  order.status = "cancelled";
+  await order.save();
+
+  res.status(200).json({ success: true, data: order });
+});
+
+export const adminUpdateOrderStatus = catchAsync(async (req, res, next) => {
+  const { status } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return next(new ApiError("Order not found", 404));
+  }
+
+  const allowedNext = VALID_TRANSITIONS[order.status];
+  if (!allowedNext || !allowedNext.includes(status)) {
+    return next(
+      new ApiError(
+        `Cannot transition from "${order.status}" to "${status}"`,
+        400,
+      ),
+    );
+  }
+
+  order.status = status;
+  await order.save();
+
+  res.status(200).json({ success: true, data: order });
+});
